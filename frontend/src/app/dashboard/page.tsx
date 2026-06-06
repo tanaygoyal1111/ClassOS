@@ -11,15 +11,20 @@ import { MobileHeader } from "@/components/MobileHeader";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { FileText, Users, Clock, ChevronRight, Plus } from "lucide-react";
 import { useAssignmentsStore } from "@/store/useAssignmentsStore";
+import { useGroupsStore } from "@/store/useGroupsStore";
 
 export default function HomePage() {
   const { data: session, status } = useSession();
   const assignments = useAssignmentsStore((state) => state.assignments);
+  const { groups, fetchGroups } = useGroupsStore();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    if (status === "authenticated") {
+      fetchGroups();
+    }
+  }, [status, fetchGroups]);
 
   // Derived Stats
   const totalPapers = assignments.length;
@@ -85,20 +90,24 @@ export default function HomePage() {
               </div>
 
               {/* Card 2: Active Groups */}
-              <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col relative overflow-hidden">
-                <div className="absolute top-6 right-6 bg-gray-100 text-gray-600 text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider">
-                  Coming Soon
-                </div>
-                <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center mb-4 opacity-50">
+              <Link href="/groups" className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col hover:shadow-md hover:border-gray-200 transition-all group cursor-pointer relative overflow-hidden">
+                <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center mb-4 transition-transform group-hover:scale-105">
                   <Users className="w-5 h-5 text-blue-600" />
                 </div>
-                <div className="mt-auto opacity-50">
+                <div className="mt-auto">
                   <p className="text-sm font-semibold text-gray-500">Active Groups</p>
                   <div className="flex items-end gap-2 mt-1">
-                    <span className="text-3xl font-bold text-gray-900 tracking-tight">0</span>
+                    {!mounted ? (
+                      <div className="h-8 w-16 bg-gray-200 animate-pulse rounded-md"></div>
+                    ) : (
+                      <span className="text-3xl font-bold text-gray-900 tracking-tight">{groups.length}</span>
+                    )}
                   </div>
                 </div>
-              </div>
+                <div className="absolute top-6 right-6 w-8 h-8 rounded-full bg-gray-50 group-hover:bg-gray-100 flex items-center justify-center shrink-0 transition-colors">
+                  <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-gray-900" />
+                </div>
+              </Link>
 
               {/* Card 3: Time Saved */}
               <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col">
