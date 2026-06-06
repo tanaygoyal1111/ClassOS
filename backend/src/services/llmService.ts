@@ -7,7 +7,9 @@ const groq = new Groq({
 });
 
 const nvidia = new OpenAI({
-  apiKey: process.env.NVIDIA_API_KEY,
+  // Provide a dummy string so the app doesn't crash on startup if the key is missing in some environments.
+  // The API will just return 401 Unauthorized if the key is "missing", which we now handle gracefully.
+  apiKey: process.env.NVIDIA_API_KEY || "missing-key-replace-me",
   baseURL: 'https://integrate.api.nvidia.com/v1',
 });
 
@@ -39,8 +41,10 @@ const RETRYABLE_STATUS_CODES = new Set([404, 429, 502, 503, 504]);
  * and therefore eligible for model/provider fallback.
  */
 const isRetryableError = (error: any): boolean => {
+  // Always retry on 401 (Unauthorized) so that if NVIDIA key is missing, it falls back to Groq!
   const status: number | undefined =
     error?.status ?? error?.statusCode ?? error?.error?.status;
+  if (status === 401) return true; 
   return typeof status === 'number' && RETRYABLE_STATUS_CODES.has(status);
 };
 
@@ -104,14 +108,15 @@ export const generateAssignment = async (
       lastError = error;
       console.warn(`[LLM] [${provider.toUpperCase()}] Model "${model}" failed: ${error?.message || error}`);
 
-      // Non-retryable errors (401 auth, 400 bad request, JSON parse, etc.) — fail fast
-      if (!isRetryableError(error)) {
-        break;
+      // If it's a completely non-retryable fatal error (like a bad prompt 400), we still just continue to the next model
+      // so the fallback chain is incredibly resilient.
+      if (!isRetryableError(error) && error?.status === 400) {
+         console.warn(`[LLM] 400 Bad Request encountered. This might be a prompt issue, but trying next model just in case.`);
       }
 
       // If there's a next model in the chain, wait briefly then try it
       if (i < MODEL_CHAIN.length - 1) {
-        console.log(`[LLM] Rate-limited/Overloaded on "${model}", falling back to "${MODEL_CHAIN[i + 1].model}"...`);
+        console.log(`[LLM] Skipping "${model}", falling back to "${MODEL_CHAIN[i + 1].model}"...`);
         await delay(1000);
       }
     }
