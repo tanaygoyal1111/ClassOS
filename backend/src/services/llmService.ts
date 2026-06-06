@@ -8,9 +8,11 @@ const groq = new Groq({
 // ── Model Fallback Chain ────────────────────────────────────────
 // Each model on Groq has *independent* rate limits.
 // If the primary hits 429/503, we gracefully fall back to the next.
+// All models are large enough to reliably follow structured JSON + OR choice instructions.
 const MODEL_CHAIN = [
-  'llama-3.3-70b-versatile',   // Primary  — best quality, lower free-tier limits
-  'llama-3.1-8b-instant',      // Fallback — fast, ~10x higher rate limits
+  'llama-3.3-70b-versatile',          // Primary  — best quality for assignments
+  'deepseek-r1-distill-llama-70b',    // Fallback 1 — 70B, strong structured output
+  'qwen-qwq-32b',                     // Fallback 2 — 32B reasoning model, reliable JSON
 ] as const;
 
 // HTTP status codes that warrant trying the next model
@@ -58,11 +60,19 @@ export const generateAssignment = async (
         response_format: { type: 'json_object' },
       });
 
-      const content = response.choices[0]?.message?.content;
+      const rawContent = response.choices[0]?.message?.content;
 
-      if (!content) {
+      if (!rawContent) {
         throw new Error('Groq returned an empty response.');
       }
+
+      // Sanitise: reasoning models may prefix output with <think>…</think> tags
+      // or wrap JSON in markdown code fences — strip both before parsing.
+      const content = rawContent
+        .replace(/<think>[\s\S]*?<\/think>/gi, '')   // strip reasoning tags
+        .replace(/^```(?:json)?\s*/i, '')             // strip leading code fence
+        .replace(/\s*```$/i, '')                      // strip trailing code fence
+        .trim();
 
       // Parse the JSON — failures here are NOT retryable (prompt issue, not model availability)
       try {
@@ -70,6 +80,7 @@ export const generateAssignment = async (
         console.log(`[LLM] Successfully generated with model: ${model}`);
         return parsed;
       } catch {
+        console.error(`[LLM] JSON parse failed for model "${model}". Raw content (first 500 chars):`, rawContent.substring(0, 500));
         throw new Error('Failed to parse AI response as valid JSON.');
       }
     } catch (error: any) {
