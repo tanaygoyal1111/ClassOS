@@ -20,18 +20,19 @@ const MODEL_CHAIN = [
   // Primary: Groq is extremely fast, use its Llama 3.3 70B first.
   { provider: 'groq', model: 'llama-3.3-70b-versatile', client: groq },
   
-  // Fallback 1: NVIDIA's Llama 3.3 70B (Identical quality, different quota pool)
-  { provider: 'nvidia', model: 'meta/llama-3.3-70b-instruct', client: nvidia },
+  // Premium NVIDIA Models (Integrated as requested)
+  { provider: 'nvidia', model: 'deepseek-ai/deepseek-v4-pro', client: nvidia },       // DeepSeek V4 Pro
+  { provider: 'nvidia', model: 'nvidia/llama-3.1-nemotron-70b-instruct', client: nvidia }, // Llama Nemotron
+  { provider: 'nvidia', model: 'moonshotai/kimi-k2.6', client: nvidia },              // Kimi (Latest Version)
+  { provider: 'nvidia', model: 'minimaxai/minimax-m2.7', client: nvidia },            // MiniMax
   
-  // Fallback 2: Groq GPT-OSS 120B (Massive model, excellent JSON adherence)
-  { provider: 'groq', model: 'openai/gpt-oss-120b', client: groq },
-  
-  // Fallback 3: NVIDIA Mixtral 8x22B (Very strong MoE, distinct architecture)
-  { provider: 'nvidia', model: 'mistralai/mixtral-8x22b-v0.1', client: nvidia },
+  // Ultimate Fallbacks
+  { provider: 'groq', model: 'openai/gpt-oss-120b', client: groq },                   // Massive 120B model
 ] as const;
 
 // HTTP status codes that warrant trying the next model
-const RETRYABLE_STATUS_CODES = new Set([429, 502, 503, 504]);
+// Added 404 so if a provider decommissions a model, we simply skip to the next
+const RETRYABLE_STATUS_CODES = new Set([404, 429, 502, 503, 504]);
 
 /**
  * Checks whether an SDK error is transient (rate-limit / server overload)
