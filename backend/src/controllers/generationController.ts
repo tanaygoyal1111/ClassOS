@@ -41,6 +41,12 @@ export const getJobStatus = async (req: Request, res: Response, next: NextFuncti
     const state = await job.getState();
 
     if (state === 'completed') {
+      if (!job.returnvalue) {
+        return res.status(200).json({
+          status: 'failed',
+          error: 'Generation completed but produced no output. Please try again.'
+        });
+      }
       return res.status(200).json({
         status: 'completed',
         result: job.returnvalue

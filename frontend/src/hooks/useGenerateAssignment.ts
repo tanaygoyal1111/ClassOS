@@ -95,6 +95,13 @@ export const useGenerateAssignment = () => {
 
           if (statusData.status === 'completed') {
             clearInterval(poll);
+
+            // Guard: ensure the AI actually returned valid data
+            if (!statusData.result || typeof statusData.result !== 'object') {
+              toast.error("AI returned an empty or invalid response. Please try again.");
+              setIsGenerating(false);
+              return;
+            }
             
             // Save to Zustand
             setGeneratedPaper(statusData.result);
@@ -102,7 +109,7 @@ export const useGenerateAssignment = () => {
             // Save to persistent Assignments Store
             const newAssignment = {
               id: Date.now().toString(),
-              title: statusData.result.paperTitle || "AI Generated Assignment",
+              title: statusData.result?.paperTitle || "AI Generated Assignment",
               classLevel: basicInfo.classLevel,
               subject: basicInfo.subject,
               assignedDate: new Date().toLocaleDateString('en-GB').replace(/\//g, '-'),
