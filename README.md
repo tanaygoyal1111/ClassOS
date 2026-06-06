@@ -422,6 +422,6 @@ This project is **proprietary** and not open-sourced. All rights reserved.
 
 **Built with ❤️ for educators, by educators.**
 
-ClassOS © 2025. All rights reserved.
+ClassOS © 2026. All rights reserved.
 
 </div>
