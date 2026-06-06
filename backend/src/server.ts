@@ -1,3 +1,6 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import express from 'express';
 import cors from 'cors';
 import documentRoutes from './routes/documentRoutes.js';
@@ -10,8 +13,26 @@ const app = express();
 // Connect to MongoDB
 connectDB();
 
-// Middlewares
-app.use(cors());
+// ── CORS: Strict origin policy ──────────────────────────────────
+const allowedOrigins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(',').map((o) => o.trim())
+  : [];
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (server-to-server, curl, health checks)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error(`CORS policy: Origin ${origin} is not allowed.`));
+    },
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 
 // Routes
