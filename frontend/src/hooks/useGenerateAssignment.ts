@@ -131,8 +131,15 @@ export const useGenerateAssignment = () => {
 
               if (!saveRes.ok) {
                 const errorText = await saveRes.text();
-                console.error('Failed to save to MongoDB:', errorText);
-                toast.error("Generated successfully, but failed to save to database.");
+                console.error(`Failed to save to MongoDB [${saveRes.status}]:`, errorText);
+                
+                if (saveRes.status === 401) {
+                  toast.error("Session expired. Please log in again and retry.");
+                } else if (saveRes.status === 413) {
+                  toast.error("Assignment data too large to save. Try reducing content.");
+                } else {
+                  toast.error("Generated successfully, but failed to save to database.");
+                }
                 setIsGenerating(false);
                 return; // Stop execution, do not push
               } 
@@ -148,9 +155,12 @@ export const useGenerateAssignment = () => {
               toast.success("Assignment generated successfully!");
               router.push('/assignments/output');
 
-            } catch (saveErr) {
+            } catch (saveErr: any) {
               console.error('MongoDB save error:', saveErr);
-              toast.error("Failed to connect to database for saving.");
+              toast.error(saveErr?.message === 'Failed to fetch'
+                ? "Network error while saving. Check your connection."
+                : "Failed to connect to database for saving."
+              );
               setIsGenerating(false);
             }
           } else if (statusData.status === 'failed') {

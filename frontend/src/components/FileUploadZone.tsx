@@ -9,6 +9,8 @@ export const FileUploadZone = () => {
   const uploadedFile = useFormStore(state => state.basicInfo.uploadedFile);
   const setUploadedFile = useFormStore(state => state.setUploadedFile);
 
+  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+
   const onDrop = useCallback((acceptedFiles: File[], fileRejections: any[]) => {
     if (fileRejections.length > 0) {
       const error = fileRejections[0].errors[0];
@@ -19,6 +21,13 @@ export const FileUploadZone = () => {
       } else {
         toast.error(`Upload error: ${error.message}`);
       }
+      return;
+    }
+
+    // Secondary safety net: manually reject oversized files
+    // (guards against browsers where dropzone's maxSize is unreliable)
+    if (acceptedFiles.length > 0 && acceptedFiles[0].size > MAX_FILE_SIZE) {
+      toast.error("File is too large. Max size is 5MB.");
       return;
     }
 
