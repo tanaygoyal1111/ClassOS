@@ -8,11 +8,11 @@ const groq = new Groq({
 // ── Model Fallback Chain ────────────────────────────────────────
 // Each model on Groq has *independent* rate limits.
 // If the primary hits 429/503, we gracefully fall back to the next.
-// All models are large enough to reliably follow structured JSON + OR choice instructions.
+// All models verified via Groq /v1/models API on 2026-06-06.
 const MODEL_CHAIN = [
-  'llama-3.3-70b-versatile',          // Primary  — best quality for assignments
-  'deepseek-r1-distill-llama-70b',    // Fallback 1 — 70B, strong structured output
-  'qwen-qwq-32b',                     // Fallback 2 — 32B reasoning model, reliable JSON
+  'llama-3.3-70b-versatile',     // Primary  — 70B, best quality for assignments
+  'openai/gpt-oss-120b',         // Fallback 1 — 120B, excellent structured JSON
+  'qwen/qwen3-32b',              // Fallback 2 — 32B, reliable JSON compliance
 ] as const;
 
 // HTTP status codes that warrant trying the next model
