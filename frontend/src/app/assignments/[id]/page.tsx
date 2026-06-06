@@ -55,19 +55,21 @@ export default async function InternalAssignmentView({ params }: { params: Promi
   };
 
   return (
-    <div className="h-screen w-full flex bg-[#F4F5F7] overflow-hidden font-sans text-gray-900 print:h-auto print:block print:bg-white">
+    <div className="h-screen w-full flex bg-[#F4F5F7] overflow-hidden font-sans text-gray-900 print:h-auto print:block print:bg-white print:overflow-visible">
       <div className="print:hidden">
         <Sidebar />
       </div>
-      <div className="flex-1 flex flex-col min-w-0 print:block">
+      <div className="flex-1 flex flex-col min-w-0 print:block print:overflow-visible">
         <div className="print:hidden">
           <Topbar />
         </div>
         
-        <main className="flex-1 p-8 overflow-y-auto relative flex flex-col items-center print:p-0 print:overflow-visible">
-          <div className="w-full max-w-[850px] mx-auto space-y-6">
+        <main className="flex-1 p-8 overflow-y-auto relative flex flex-col items-center print:p-0 print:overflow-visible print:block print:h-auto">
+          <div className="w-full max-w-[850px] mx-auto space-y-6 print:m-0 print:max-w-none">
             
-            <PrintActionCard paperTitle={fullPaperData.paperTitle} />
+            <div className="print:hidden">
+              <PrintActionCard paperTitle={fullPaperData.paperTitle} />
+            </div>
 
             <div id="paper-pdf-container" className="bg-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] p-12 md:px-20 md:py-16 text-gray-900 border border-gray-200 print:shadow-none print:border-none print:m-0 print:max-w-none print:p-0">
               <PaperRenderer paperData={fullPaperData} />

@@ -31,7 +31,7 @@ export const AssignmentOutput = () => {
   }
 
   return (
-    <div className="w-full h-full bg-[#27272A] rounded-[32px] p-6 md:p-10 overflow-y-auto animate-in fade-in duration-500 relative scroll-smooth">
+    <div className="w-full h-full bg-[#27272A] rounded-[32px] p-6 md:p-10 overflow-y-auto animate-in fade-in duration-500 relative scroll-smooth print:bg-white print:p-0 print:overflow-visible print:h-auto print:block print:rounded-none">
       
       {/* Top Action Card */}
       <div className="bg-[#1F2937] rounded-3xl p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-5 mb-10 shadow-2xl border border-gray-700/50 print:hidden">

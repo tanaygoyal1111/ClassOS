@@ -6,7 +6,6 @@ import { Sidebar } from "@/components/Sidebar";
 import { Topbar } from "@/components/Topbar";
 import { MobileHeader } from "@/components/MobileHeader";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
-import { EditProfileModal } from "@/components/EditProfileModal";
 import { NewGroupModal } from "@/components/NewGroupModal";
 import { useGroupsStore, Group } from "@/store/useGroupsStore";
 import { Loader2, Folder, Plus, Users, BookOpen, MoreVertical, Trash2 } from "lucide-react";
@@ -114,7 +113,6 @@ export default function GroupsPage() {
 
   return (
     <div className="h-screen w-full flex bg-[#F4F5F7] overflow-hidden font-sans text-gray-900 relative">
-      <EditProfileModal />
       <NewGroupModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
       
       <Sidebar />

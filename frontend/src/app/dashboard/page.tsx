@@ -9,7 +9,6 @@ import { Sidebar } from "@/components/Sidebar";
 import { Topbar } from "@/components/Topbar";
 import { MobileHeader } from "@/components/MobileHeader";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
-import { EditProfileModal } from "@/components/EditProfileModal";
 import { FileText, Users, Clock, ChevronRight, Plus } from "lucide-react";
 import { useAssignmentsStore } from "@/store/useAssignmentsStore";
 
@@ -38,7 +37,6 @@ export default function HomePage() {
 
   return (
     <div className="h-screen w-full flex bg-[#F4F5F7] overflow-hidden font-sans text-gray-900">
-      <EditProfileModal />
       <Sidebar />
       <MobileHeader />
 

@@ -177,8 +177,8 @@ export default function LibraryPage() {
                           title={assignment.paperContent?.paperTitle || "Untitled Paper"}
                           classLevel={assignment.classLevel}
                           subject={assignment.subject}
-                          assignedDate={new Date(assignment.createdAt).toISOString()}
-                          dueDate={new Date(assignment.createdAt).toISOString()}
+                          assignedDate={assignment.createdAt ? format(new Date(assignment.createdAt), 'MMM d, yyyy') : "N/A"}
+                          dueDate={assignment.createdAt ? format(new Date(assignment.createdAt), 'MMM d, yyyy') : "N/A"}
                           viewContext="dashboard"
                           onView={(id) => router.push(`/assignments/${id}`)}
                           onDelete={handleAssignmentDelete}

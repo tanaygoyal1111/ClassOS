@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import { AuthProvider } from "@/components/AuthProvider";
+import { EditProfileModal } from "@/components/EditProfileModal";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -31,6 +32,7 @@ export default function RootLayout({
       >
         <AuthProvider>
           {children}
+          <EditProfileModal />
           <Toaster position="top-right" richColors />
         </AuthProvider>
       </body>
