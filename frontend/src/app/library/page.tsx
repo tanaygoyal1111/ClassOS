@@ -26,6 +26,10 @@ export default function LibraryPage() {
   const [selectedDoc, setSelectedDoc] = useState<any | null>(null);
   const [selectedDocType, setSelectedDocType] = useState<"lesson" | "rubric" | "concept" | null>(null);
 
+  // Modal State for delete confirmation
+  const [itemToDelete, setItemToDelete] = useState<{ id: string; type: "lesson" | "rubric" | "concept"; title: string } | null>(null);
+  const [isDeletingItem, setIsDeletingItem] = useState(false);
+
   useEffect(() => {
     fetchLibraryData();
   }, []);
@@ -60,6 +64,7 @@ export default function LibraryPage() {
   };
 
   const handleDelete = async (id: string, type: "lesson" | "rubric" | "concept") => {
+    setIsDeletingItem(true);
     const endpointMap = {
       lesson: "/api/toolkit/lesson-plan",
       rubric: "/api/toolkit/rubric-creator",
@@ -75,6 +80,7 @@ export default function LibraryPage() {
         if (type === "concept") setConcepts(prev => prev.filter(item => item._id !== id));
         
         toast.success("Item deleted");
+        setItemToDelete(null);
         if (selectedDoc?._id === id) {
           setSelectedDoc(null);
           setSelectedDocType(null);
@@ -84,6 +90,8 @@ export default function LibraryPage() {
       }
     } catch (e) {
       toast.error("Something went wrong");
+    } finally {
+      setIsDeletingItem(false);
     }
   };
 
@@ -206,9 +214,7 @@ export default function LibraryPage() {
                               {plan.subject}
                             </div>
                             <button 
-                              onClick={() => {
-                                if (confirm("Delete this lesson plan?")) handleDelete(plan._id, "lesson");
-                              }}
+                              onClick={() => setItemToDelete({ id: plan._id, type: "lesson", title: plan.topic })}
                               className="text-gray-400 hover:text-red-500 hover:bg-red-50 p-2 rounded-xl transition-colors"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -257,9 +263,7 @@ export default function LibraryPage() {
                               {rubric.subject}
                             </div>
                             <button 
-                              onClick={() => {
-                                if (confirm("Delete this rubric?")) handleDelete(rubric._id, "rubric");
-                              }}
+                              onClick={() => setItemToDelete({ id: rubric._id, type: "rubric", title: rubric.assignmentTitle })}
                               className="text-gray-400 hover:text-red-500 hover:bg-red-50 p-2 rounded-xl transition-colors"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -308,9 +312,7 @@ export default function LibraryPage() {
                               {concept.subject}
                             </div>
                             <button 
-                              onClick={() => {
-                                if (confirm("Delete this concept?")) handleDelete(concept._id, "concept");
-                              }}
+                              onClick={() => setItemToDelete({ id: concept._id, type: "concept", title: concept.concept })}
                               className="text-gray-400 hover:text-red-500 hover:bg-red-50 p-2 rounded-xl transition-colors"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -351,6 +353,39 @@ export default function LibraryPage() {
           </div>
         </main>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {itemToDelete && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => !isDeletingItem && setItemToDelete(null)} />
+          <div className="bg-white w-full max-w-md rounded-[24px] shadow-2xl relative z-10 flex flex-col overflow-hidden p-6 text-center animate-in zoom-in-95 duration-200">
+            <div className="mx-auto w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mb-4">
+              <Trash2 className="w-8 h-8 text-red-500" />
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">Delete {itemToDelete.type === 'lesson' ? 'Lesson Plan' : itemToDelete.type === 'rubric' ? 'Rubric' : 'Concept'}</h3>
+            <p className="text-gray-500 mb-6 font-medium">
+              Are you sure you want to delete <span className="font-bold text-gray-700">"{itemToDelete.title}"</span>? This action cannot be undone.
+            </p>
+            <div className="flex items-center gap-3 w-full">
+              <button 
+                onClick={() => setItemToDelete(null)}
+                disabled={isDeletingItem}
+                className="flex-1 py-3 px-4 bg-gray-100 hover:bg-gray-200 disabled:opacity-50 text-gray-700 font-bold rounded-xl transition-colors"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={() => handleDelete(itemToDelete.id, itemToDelete.type)}
+                disabled={isDeletingItem}
+                className="flex-1 py-3 px-4 bg-red-500 hover:bg-red-600 disabled:opacity-70 text-white font-bold rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2"
+              >
+                {isDeletingItem ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
+                {isDeletingItem ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Universal Document View Modal */}
       {selectedDoc && (
