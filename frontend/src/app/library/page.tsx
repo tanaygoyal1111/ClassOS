@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { format } from 'date-fns';
+import { useAssignmentsStore } from '@/store/useAssignmentsStore';
 
 export default function LibraryPage() {
   const router = useRouter();
@@ -51,12 +52,15 @@ export default function LibraryPage() {
     }
   };
 
+  const removeAssignment = useAssignmentsStore(state => state.removeAssignment);
+
   const handleAssignmentDelete = async (id: string) => {
     setIsDeletingItem(true);
     try {
       const res = await fetch(`/api/assignments/${id}`, { method: 'DELETE' });
       if (res.ok) {
         setAssignments(prev => prev.filter(a => a._id !== id));
+        removeAssignment(id);
         toast.success("Assignment deleted");
         setItemToDelete(null);
       } else {

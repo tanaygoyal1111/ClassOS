@@ -29,14 +29,14 @@ export const useAssignmentsStore = create<AssignmentsState>()(
         assignments: [assignment, ...state.assignments] 
       })),
       removeAssignment: (id) => set((state) => ({ 
-        assignments: state.assignments.filter(a => a.id !== id) 
+        assignments: state.assignments.filter(a => a.id !== id && (a as any)._id !== id) 
       })),
       deleteAssignment: async (id) => {
         try {
           const response = await fetch(`/api/assignments/${id}`, { method: 'DELETE' });
           const data = await response.json();
           if (data.success) {
-            set((state) => ({ assignments: state.assignments.filter(a => a.id !== id) }));
+            set((state) => ({ assignments: state.assignments.filter(a => a.id !== id && (a as any)._id !== id) }));
             return true;
           }
           return false;
@@ -55,7 +55,7 @@ export const useAssignmentsStore = create<AssignmentsState>()(
           const data = await response.json();
           if (data.success) {
             set((state) => ({
-              assignments: state.assignments.map(a => a.id === id ? { ...a, groupId } : a)
+              assignments: state.assignments.map(a => (a.id === id || (a as any)._id === id) ? { ...a, groupId } : a)
             }));
             return true;
           }
