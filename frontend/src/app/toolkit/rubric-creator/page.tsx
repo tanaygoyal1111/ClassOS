@@ -6,7 +6,7 @@ import { Topbar } from "@/components/Topbar";
 import { MobileHeader } from "@/components/MobileHeader";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { ArrowLeft, Sparkles, Copy, Check, Loader2, Table2, Printer, Bookmark } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
