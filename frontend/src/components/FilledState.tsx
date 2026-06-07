@@ -159,7 +159,7 @@ export const FilledState = ({ assignments }: FilledStateProps) => {
 
       return true;
     });
-  }, [assignments, searchQuery, appliedFilters]);
+  }, [localAssignments, searchQuery, appliedFilters]);
 
   return (
     <div className="w-full h-full flex flex-col relative animate-in fade-in duration-500">
