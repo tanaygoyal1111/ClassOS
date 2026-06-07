@@ -8,7 +8,7 @@ import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { AssignmentCard } from "@/components/AssignmentCard";
 import { BookOpen, FileText, Loader2, Calendar, Clock, BookMarked, Trash2, X, Eye, FileCheck, Lightbulb } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { format } from 'date-fns';
@@ -27,7 +27,7 @@ export default function LibraryPage() {
   const [selectedDocType, setSelectedDocType] = useState<"lesson" | "rubric" | "concept" | null>(null);
 
   // Modal State for delete confirmation
-  const [itemToDelete, setItemToDelete] = useState<{ id: string; type: "lesson" | "rubric" | "concept"; title: string } | null>(null);
+  const [itemToDelete, setItemToDelete] = useState<{ id: string; type: "lesson" | "rubric" | "concept" | "assignment"; title: string } | null>(null);
   const [isDeletingItem, setIsDeletingItem] = useState(false);
 
   useEffect(() => {
@@ -52,14 +52,20 @@ export default function LibraryPage() {
   };
 
   const handleAssignmentDelete = async (id: string) => {
+    setIsDeletingItem(true);
     try {
       const res = await fetch(`/api/assignments/${id}`, { method: 'DELETE' });
       if (res.ok) {
         setAssignments(prev => prev.filter(a => a._id !== id));
         toast.success("Assignment deleted");
+        setItemToDelete(null);
+      } else {
+        toast.error("Failed to delete assignment");
       }
     } catch (e) {
       toast.error("Failed to delete assignment");
+    } finally {
+      setIsDeletingItem(false);
     }
   };
 
@@ -189,7 +195,7 @@ export default function LibraryPage() {
                           dueDate={assignment.createdAt ? format(new Date(assignment.createdAt), 'MMM d, yyyy') : "N/A"}
                           viewContext="dashboard"
                           onView={(id) => router.push(`/assignments/${id}`)}
-                          onDelete={handleAssignmentDelete}
+                          onDelete={(id) => setItemToDelete({ id, type: "assignment", title: assignment.paperContent?.paperTitle || "Untitled Paper" })}
                         />
                       ))
                     ) : (
@@ -362,7 +368,7 @@ export default function LibraryPage() {
             <div className="mx-auto w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mb-4">
               <Trash2 className="w-8 h-8 text-red-500" />
             </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">Delete {itemToDelete.type === 'lesson' ? 'Lesson Plan' : itemToDelete.type === 'rubric' ? 'Rubric' : 'Concept'}</h3>
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">Delete {itemToDelete.type === 'lesson' ? 'Lesson Plan' : itemToDelete.type === 'rubric' ? 'Rubric' : itemToDelete.type === 'concept' ? 'Concept' : 'Saved Paper'}</h3>
             <p className="text-gray-500 mb-6 font-medium">
               Are you sure you want to delete <span className="font-bold text-gray-700">"{itemToDelete.title}"</span>? This action cannot be undone.
             </p>
@@ -375,7 +381,13 @@ export default function LibraryPage() {
                 Cancel
               </button>
               <button 
-                onClick={() => handleDelete(itemToDelete.id, itemToDelete.type)}
+                onClick={() => {
+                  if (itemToDelete.type === "assignment") {
+                    handleAssignmentDelete(itemToDelete.id);
+                  } else {
+                    handleDelete(itemToDelete.id, itemToDelete.type);
+                  }
+                }}
                 disabled={isDeletingItem}
                 className="flex-1 py-3 px-4 bg-red-500 hover:bg-red-600 disabled:opacity-70 text-white font-bold rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2"
               >
